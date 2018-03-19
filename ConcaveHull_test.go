@@ -5,10 +5,14 @@ import (
 	"fmt"
 )
 
-func TestCompute(t *testing.T) {
-	points := FlatPoints{0.0, 0.0, 1.0, 1.0, 1.0, 0.0}
+func TestCompute_convexHullInAntiClockwiseOrder(t *testing.T) {
+	points := FlatPoints{0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0}
+	points2 := append([]float64{}, points...)
+	points2 = append(points2)
 	result := ComputeFromSorted(points)
-	compareConcaveHulls(t, points, result)
+	fmt.Println(result)
+	fmt.Println(points2)
+	compareConcaveHulls(t, result, points2)
 }
 
 
