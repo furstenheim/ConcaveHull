@@ -21,7 +21,7 @@ func (s lexSorter) Less (i, j int) bool {
 }
 
 func (s lexSorter) Len () (int) {
-	return len(s)
+	return len(s) / 2
 }
 
 func (s lexSorter) Swap (i, j int) {

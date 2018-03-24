@@ -41,6 +41,7 @@ func ComputeFromSorted (points FlatPoints) (concaveHull FlatPoints) {
 		rtree.LoadSortedArray(SimpleRTree.FlatPoints(pointsCopy))
 		wg.Done()
 	}()
+	wg.Wait()
 	var c concaver
 	c.seglength = 0.0001 // TODO get from options
 	c.rtree = rtree
@@ -50,6 +51,8 @@ func ComputeFromSorted (points FlatPoints) (concaveHull FlatPoints) {
 func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatPoints) {
 	// TODO treat degenerated cases of convexHull
 	concaveHull = make([]float64, 0, 2 * convexHull.Len())
+	x0, y0 := convexHull.Take(0)
+	concaveHull = append(concaveHull, x0, y0)
 	for i := 0; i<convexHull.Len(); i++ {
 		x1, y1 := convexHull.Take(i)
 		var x2, y2 float64
@@ -72,17 +75,15 @@ func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []float64) {
 	flatPoints := make([]float64, 0, int(2 * nSegments))
 	vX := factor * (x2 - x1)
 	vY := factor * (y2 - y1)
-	flatPoints = append(flatPoints, x1, y1)
 
 	currentX := x1
 	currentY := y1
 
 	latestX := x1
 	latestY := y1
-
 	for i := 0; i < int(nSegments); i++ {
 		x, y, _, _ := c.rtree.FindNearestPoint(currentX, currentY)
-		if x != latestX && y != latestY {
+		if x != latestX || y != latestY {
 			flatPoints = append(flatPoints, x, y)
 			latestX = x
 			latestY = y

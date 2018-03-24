@@ -7,13 +7,43 @@ import (
 
 func TestCompute_convexHullInAntiClockwiseOrder(t *testing.T) {
 	points := FlatPoints{0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0}
-	points2 := append([]float64{}, points...)
-	points2 = append(points2)
+	points2 := FlatPoints{0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0., 0.}
 	result := ComputeFromSorted(points)
 	fmt.Println(result)
 	fmt.Println(points2)
 	compareConcaveHulls(t, result, points2)
 }
+
+
+func TestCompute_convexHullShuffled(t *testing.T) {
+	points := FlatPoints{1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0}
+	points2 := FlatPoints{0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0., 0.}
+	result := Compute(points)
+	fmt.Println("result", result)
+	fmt.Println(points2)
+	compareConcaveHulls(t, result, points2)
+}
+
+func TestComputeFromSorted_simpleConvexHull(t *testing.T) {
+	points := FlatPoints{0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0}
+	points2 := FlatPoints{0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0., 0.}
+	result := ComputeFromSorted(points)
+	fmt.Println(result)
+	fmt.Println(points2)
+	compareConcaveHulls(t, result, points2)
+}
+
+
+func TestCompute_simpleConcaveHull(t *testing.T) {
+	points := FlatPoints{1./3., 0.5, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0}
+	points2 := FlatPoints{0.0, 0.0, 1.0, 0., 1., 1., 0., 1., 1./3., 0.5, 0.0, 0.0}
+	result := Compute(points)
+	fmt.Println(result)
+	fmt.Println(points2)
+	compareConcaveHulls(t, result, points2)
+}
+
+
 
 
 func compareConcaveHulls(t *testing.T, actualC, expectedC FlatPoints) {
