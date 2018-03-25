@@ -18,7 +18,7 @@ import (
 
 type concaver struct {
 	rtree * SimpleRTree.SimpleRTree
-	seglength, simplifierDistance float64
+	seglength float64
 }
 func Compute (points FlatPoints) (concaveHull FlatPoints) {
 	sort.Sort(lexSorter(points))
@@ -45,8 +45,7 @@ func ComputeFromSorted (points FlatPoints) (concaveHull FlatPoints) {
 	}()
 	wg.Wait()
 	var c concaver
-	c.seglength = 0.0001 // TODO get from options
-	c.simplifierDistance = 0.00001 // TODO get from options
+	c.seglength = 0.001
 	c.rtree = rtree
 	return c.computeFromSorted(points)
 }
@@ -70,7 +69,7 @@ func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatP
 		sideSplit := c.segmentize(x1, y1, x2, y2)
 		concaveHull = append(concaveHull, sideSplit...)
 	}
-	path := reducers.DouglasPeucker(geo.NewPathFromFlatXYData(concaveHull), c.simplifierDistance)
+	path := reducers.DouglasPeucker(geo.NewPathFromFlatXYData(concaveHull), c.seglength)
 	// reused allocated array
 	concaveHull = concaveHull[0:0]
 	reducedPoints := path.Points()

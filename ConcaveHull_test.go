@@ -3,6 +3,9 @@ package ConcaveHull
 import (
 	"testing"
 	"fmt"
+	"log"
+	"io/ioutil"
+	"github.com/paulmach/go.geo"
 )
 
 func TestCompute_convexHullInAntiClockwiseOrder(t *testing.T) {
@@ -43,6 +46,26 @@ func TestCompute_simpleConcaveHull(t *testing.T) {
 	compareConcaveHulls(t, result, points2)
 }
 
+func BenchmarkCompute_wkb(b * testing.B) {
+	dat, err := ioutil.ReadFile("./wkb")
+	if (err != nil) {
+		log.Fatal(err)
+	}
+	path := geo.NewPathFromWKB(dat)
+	points := make([]float64, 2 * path.Length())
+	for _, p := range(path.Points()) {
+		points = append(points, p.Lng(), p.Lat())
+	}
+	fmt.Println("Length of polygon", path.Length())
+
+	b.Run("Wkb", func (b * testing.B) {
+		result := Compute(points)
+		fmt.Println(result.Len())
+	})
+
+
+}
+
 
 
 
@@ -59,7 +82,7 @@ func compareConcaveHulls(t *testing.T, actualC, expectedC FlatPoints) {
 		x2, y2 := expectedC.Take(i)
 		if x1 != x2 || y1 != y2 {
 			fmt.Println(actualC, expectedC)
-			t.Errorf("%d th point of the convex hull was not correct, got: %+v want: %+v", i, x1, y1, x2, y2)
+			t.Errorf("%d th point of the convex hull was not correct, got: %+v want: %+v", i, x1, y1)
 		}
 	}
 }
