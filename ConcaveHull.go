@@ -11,12 +11,14 @@ import (
 	"sync"
 	"github.com/furstenheim/SimpleRTree"
 	"math"
+	"github.com/paulmach/go.geo"
+	"github.com/paulmach/go.geo/reducers"
 )
 
 
 type concaver struct {
 	rtree * SimpleRTree.SimpleRTree
-	seglength float64
+	seglength, simplifierDistance float64
 }
 func Compute (points FlatPoints) (concaveHull FlatPoints) {
 	sort.Sort(lexSorter(points))
@@ -44,12 +46,16 @@ func ComputeFromSorted (points FlatPoints) (concaveHull FlatPoints) {
 	wg.Wait()
 	var c concaver
 	c.seglength = 0.0001 // TODO get from options
+	c.simplifierDistance = 0.00001 // TODO get from options
 	c.rtree = rtree
 	return c.computeFromSorted(points)
 }
 
 func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatPoints) {
-	// TODO treat degenerated cases of convexHull
+	// degerated case
+	if (convexHull.Len() < 3) {
+		return convexHull
+	}
 	concaveHull = make([]float64, 0, 2 * convexHull.Len())
 	x0, y0 := convexHull.Take(0)
 	concaveHull = append(concaveHull, x0, y0)
@@ -63,6 +69,13 @@ func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatP
 		}
 		sideSplit := c.segmentize(x1, y1, x2, y2)
 		concaveHull = append(concaveHull, sideSplit...)
+	}
+	path := reducers.DouglasPeucker(geo.NewPathFromFlatXYData(concaveHull), c.simplifierDistance)
+	// reused allocated array
+	concaveHull = concaveHull[0:0]
+	reducedPoints := path.Points()
+	for _, p := range(reducedPoints) {
+		concaveHull = append(concaveHull, p.Lng(), p.Lat())
 	}
 	return concaveHull
 }
