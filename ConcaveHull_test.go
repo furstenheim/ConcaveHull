@@ -84,15 +84,17 @@ func BenchmarkCompute_wkb(b * testing.B) {
 		log.Fatal(err)
 	}
 	path := geo.NewPathFromWKB(dat)
-	points := make([]float64, 2 * path.Length())
+	points := make([]float64, 0, 2 * path.Length())
 	for _, p := range(path.Points()) {
 		points = append(points, p.Lng(), p.Lat())
 	}
 	fmt.Println("Length of polygon", path.Length())
 
 	b.Run("Wkb", func (b * testing.B) {
-		result := Compute(points)
-		fmt.Println(result.Len())
+		for n := 0; n < b.N; n++ {
+			result := Compute(points)
+			fmt.Println(result.Len())
+		}
 	})
 
 
