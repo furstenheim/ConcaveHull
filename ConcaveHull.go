@@ -15,7 +15,7 @@ import (
 	"github.com/paulmach/go.geo/reducers"
 )
 
-
+const DEFAULT_SEGLENGTH = .001
 type concaver struct {
 	rtree * SimpleRTree.SimpleRTree
 	seglength float64
@@ -45,7 +45,7 @@ func ComputeFromSorted (points FlatPoints) (concaveHull FlatPoints) {
 	}()
 	wg.Wait()
 	var c concaver
-	c.seglength = 0.001
+	c.seglength = DEFAULT_SEGLENGTH
 	c.rtree = rtree
 	return c.computeFromSorted(points)
 }
@@ -88,23 +88,59 @@ func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []float64) {
 	vX := factor * (x2 - x1)
 	vY := factor * (y2 - y1)
 
-	currentX := x1
-	currentY := y1
+	closestPoints := make(map[int][2]float64)
+	closestPoints[0] = [2]float64{x1, y1}
+	closestPoints[int(nSegments)] = [2]float64{x2, y2}
 
-	latestX := x1
-	latestY := y1
-	for i := 0; i < int(nSegments); i++ {
-		x, y, _, _ := c.rtree.FindNearestPoint(currentX, currentY)
-		if x != latestX || y != latestY {
-			flatPoints = append(flatPoints, x, y)
-			latestX = x
-			latestY = y
+	if (nSegments > 1) {
+		stack := make([]searchItem, 0)
+		stack = append(stack, searchItem{left: 0, right: int(nSegments), lastLeft: 0, lastRight: int(nSegments)})
+		for len(stack) > 0 {
+			var item searchItem
+			item, stack = stack[len(stack)-1], stack[:len(stack)-1]
+			index := (item.left + item.right) / 2
+			currentX := x1 + vX * float64(index)
+			currentY := y1 + vY * float64(index)
+			x, y, _, _ := c.rtree.FindNearestPoint(currentX, currentY)
+			isNewLeft := x != closestPoints[item.lastLeft][0] || y != closestPoints[item.lastLeft][1]
+			isNewRight := x != closestPoints[item.lastRight][0] || y != closestPoints[item.lastRight][1]
+
+			// we don't know the point
+			if isNewLeft && isNewRight {
+				closestPoints[index] = [2]float64{x, y}
+				if (index - item.left 	> 1) {
+					stack = append(stack, searchItem{left: item.left, right: index, lastLeft: item.lastLeft, lastRight: index})
+				}
+				if (item.right - index > 1) {
+					stack = append(stack, searchItem{left: index, right: item.right, lastLeft: index, lastRight: item.lastRight})
+				}
+			} else if (isNewLeft) {
+				if (index - item.left > 1) {
+					stack = append(stack, searchItem{left: item.left, right: index, lastLeft: item.lastLeft, lastRight: item.lastRight})
+				}
+			} else if (isNewRight) {
+				// don't add point to closest points, but we need to keep looking on the right side
+				if (item.right - index > 1) {
+					stack = append(stack, searchItem{left: index, right: item.right, lastLeft: item.lastLeft, lastRight: item.lastRight})
+				}
+			}
 		}
-		currentX += vX
-		currentY += vY
+	}
+	// always add last point of the segment
+	for i := 1; i <= int(nSegments); i++ {
+		point, ok := closestPoints[i]
+		if (ok) {
+			flatPoints = append(flatPoints, point[0], point[1])
+		}
 	}
 	return flatPoints
 }
+
+type searchItem struct {
+	left, right, lastLeft, lastRight int
+
+}
+
 
 
 type FlatPoints []float64

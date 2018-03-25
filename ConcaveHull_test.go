@@ -6,6 +6,9 @@ import (
 	"log"
 	"io/ioutil"
 	"github.com/paulmach/go.geo"
+	"math"
+	"math/rand"
+	"github.com/furstenheim/SimpleRTree"
 )
 
 func TestCompute_convexHullInAntiClockwiseOrder(t *testing.T) {
@@ -44,6 +47,35 @@ func TestCompute_simpleConcaveHull(t *testing.T) {
 	fmt.Println(result)
 	fmt.Println(points2)
 	compareConcaveHulls(t, result, points2)
+}
+
+func TestConcaveHull_segmentize (t *testing.T) {
+	const size = 200
+	points := make([]float64, size * 2)
+	for i := 0; i < 2 * size; i++ {
+		points[i] = rand.Float64()
+	}
+	fp := FlatPoints(points)
+	r := SimpleRTree.New().Load(SimpleRTree.FlatPoints(fp))
+	c := new(concaver)
+	c.rtree = r
+
+
+	c.seglength = DEFAULT_SEGLENGTH
+
+	for i := 0; i < 1; i++ {
+		index1 := rand.Intn(size)
+		index2 := rand.Intn(size)
+		x1, y1 := fp.Take(index1)
+		x2, y2 := fp.Take(index2)
+		p1 := c.segmentize(x1, y1, x2, y2)
+		p2 := c.segmentizeLinear(x1, y1, x2, y2)
+		fmt.Println(x1, y1, x2, y2)
+		fmt.Println(p1)
+		fmt.Println(p2)
+		compareConcaveHulls(t, p1, p2)
+	}
+
 }
 
 func BenchmarkCompute_wkb(b * testing.B) {
@@ -85,4 +117,31 @@ func compareConcaveHulls(t *testing.T, actualC, expectedC FlatPoints) {
 			t.Errorf("%d th point of the convex hull was not correct, got: %+v want: %+v", i, x1, y1)
 		}
 	}
+}
+
+// Split side in small edges, for each edge find closest point. Remove duplicates
+func (c * concaver) segmentizeLinear (x1, y1, x2, y2 float64) (points []float64) {
+	dist := math.Sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
+	nSegments := math.Ceil(dist / c.seglength)
+	factor := 1 / nSegments
+	flatPoints := make([]float64, 0, int(2 * nSegments))
+	vX := factor * (x2 - x1)
+	vY := factor * (y2 - y1)
+
+	currentX := x1
+	currentY := y1
+
+	latestX := x1
+	latestY := y1
+	for i := 0; i < int(nSegments); i++ {
+		x, y, _, _ := c.rtree.FindNearestPoint(currentX, currentY)
+		if x != latestX || y != latestY {
+			flatPoints = append(flatPoints, x, y)
+			latestX = x
+			latestY = y
+		}
+		currentX += vX
+		currentY += vY
+	}
+	return flatPoints
 }
