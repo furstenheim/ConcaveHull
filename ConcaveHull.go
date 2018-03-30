@@ -13,9 +13,10 @@ import (
 	"math"
 	"github.com/paulmach/go.geo"
 	"github.com/paulmach/go.geo/reducers"
+	"io/ioutil"
 )
 
-const DEFAULT_SEGLENGTH = .001
+const DEFAULT_SEGLENGTH = 0.001
 type concaver struct {
 	rtree * SimpleRTree.SimpleRTree
 	seglength float64
@@ -73,6 +74,9 @@ func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatP
 	// reused allocated array
 	concaveHull = concaveHull[0:0]
 	reducedPoints := path.Points()
+	dat, _ := path.ToGeoJSON().MarshalJSON()
+	ioutil.WriteFile("./geojson1", dat, 0644)
+
 	for _, p := range(reducedPoints) {
 		concaveHull = append(concaveHull, p.Lng(), p.Lat())
 	}
