@@ -4,11 +4,13 @@ import (
 	"testing"
 	"fmt"
 	"log"
-	"io/ioutil"
-	"github.com/paulmach/go.geo"
 	"math"
 	"math/rand"
 	"github.com/furstenheim/SimpleRTree"
+	"bufio"
+	"os"
+	"strings"
+	"strconv"
 )
 
 func TestCompute_convexHullInAntiClockwiseOrder(t *testing.T) {
@@ -78,26 +80,30 @@ func TestConcaveHull_segmentize (t *testing.T) {
 
 }
 
-func BenchmarkCompute_wkb(b * testing.B) {
-	dat, err := ioutil.ReadFile("./wkb")
+// Benchmark on the bus stations of uk
+func BenchmarkCompute_300k(b * testing.B) {
+	file, err := os.Open("./example/busStops380")
 	if (err != nil) {
 		log.Fatal(err)
 	}
-	path := geo.NewPathFromWKB(dat)
-	points := make([]float64, 0, 2 * path.Length())
-	for _, p := range(path.Points()) {
-		points = append(points, p.Lng(), p.Lat())
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	var points []float64
+	for scanner.Scan() {
+		coordinates := strings.Fields(scanner.Text())
+		x, _ := strconv.ParseFloat(coordinates[1], 64)
+		y, err := strconv.ParseFloat(coordinates[0], 64)
+		// mainly headers
+		if (err == nil) {
+			points = append(points, x, y)
+		}
 	}
-	fmt.Println("Length of polygon", path.Length())
 
-	b.Run("Wkb", func (b * testing.B) {
+	b.Run("300", func (b * testing.B) {
 		for n := 0; n < b.N; n++ {
-			result := Compute(points)
-			fmt.Println(result.Len())
+			_ = Compute(points)
 		}
 	})
-
-
 }
 
 
