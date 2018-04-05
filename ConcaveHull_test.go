@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 	"strconv"
+	"path/filepath"
 )
 
 func TestCompute_convexHullInAntiClockwiseOrder(t *testing.T) {
@@ -79,10 +80,28 @@ func TestConcaveHull_segmentize (t *testing.T) {
 	}
 
 }
+//go:generate git submodule init
+//go:generate git submodule update
+//go:generate git submodule foreach git pull origin master
+func Benchmark_ConcaveHull (b * testing.B) {
+	dir := "examples"
+	err := filepath.Walk(dir, func (path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+		if !info.IsDir() && info.Name() != ".git" {
+			scanBenchmark(b, path, info)
+		}
+		return nil
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
-// Benchmark on the bus stations of uk
-func BenchmarkCompute_300k(b * testing.B) {
-	file, err := os.Open("./example/busStops380")
+func scanBenchmark (b * testing.B, path string, f os.FileInfo) {
+	file, err := os.Open(path)
 	if (err != nil) {
 		log.Fatal(err)
 	}
@@ -90,7 +109,10 @@ func BenchmarkCompute_300k(b * testing.B) {
 	scanner := bufio.NewScanner(file)
 	var points []float64
 	for scanner.Scan() {
-		coordinates := strings.Fields(scanner.Text())
+		myfunc := func(c rune) bool {
+			return c == ';'
+		}
+		coordinates := strings.FieldsFunc(scanner.Text(), myfunc)
 		x, _ := strconv.ParseFloat(coordinates[1], 64)
 		y, err := strconv.ParseFloat(coordinates[0], 64)
 		// mainly headers
@@ -99,7 +121,7 @@ func BenchmarkCompute_300k(b * testing.B) {
 		}
 	}
 
-	b.Run("300", func (b * testing.B) {
+	b.Run(path, func (b * testing.B) {
 		for n := 0; n < b.N; n++ {
 			_ = Compute(points)
 		}

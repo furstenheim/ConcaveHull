@@ -19,13 +19,13 @@ It builds a Concave Hull around the points but it is not an [alpha shape](https:
 
 The following benchmark was run on example 4 from [this website](https://www.codeproject.com/Articles/1201438/The-Concave-Hull-of-a-Set-of-Points). It took 0.28s to build the concave hull.
 
-    BenchmarkCompute_300k/300-4         	5	 280774281 ns/op
+    Benchmark_ConcaveHull/examples/examples/4-camps-drift.txt-4          	       5	 287414703 ns/op
 
 The benchmark was done in a i5 2.50GHz 8Gb of RAM running on Linux
 
 ![Concave hull of a network](./example.png?raw=true "Concave Hull")
 
-
+To run the benchmarks run `go generate`, this will download all the necessary files
 
 ### Installation
 
