@@ -2,16 +2,22 @@
 
 
 [[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/furstenheim/SimpleRTree"
   packages = ["."]
-  revision = "66ed97338197ea9e68350b4673a6bbc6f893d512"
+  revision = "59de95fefcfe9d3de2d37e82be51c45b8f1c595b"
 
 [[projects]]
   branch = "master"
   name = "github.com/furstenheim/go-convex-hull-2d"
   packages = ["."]
-  revision = "5ef73da136386bf6ed909afa7851366190dc98e9"
+  revision = "7afa6a3e6918d3ba86e0b1369810bf9bed310f77"
 
 [[projects]]
   branch = "master"
@@ -20,18 +26,30 @@
     ".",
     "reducers"
   ]
-  revision = "45618a99496bae45b4dac055081f00edff07cb4f"
+  revision = "516b90fcfa56a87a1d1d7b8f307e8e5764a40ddb"
   source = "github.com/furstenheim/go.geo"
 
 [[projects]]
   name = "github.com/paulmach/go.geojson"
   packages = ["."]
-  revision = "aa3713dea4327980f5891ac781c6f1a45ea75c0f"
-  version = "v1.3.1"
+  revision = "a5c451da2d9c67c590ae6be92565b67698286a1a"
+  version = "v1.4"
+
+[[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
+  version = "v1.2.2"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f331548530d9b2f565f0d8336518b81d1f8d5fe433078e22accd732168fd4935"
+  inputs-digest = "778f40daab31101f7efa94181b4fe4375d1f9138698dc50ec649a57f326fe99c"
   solver-name = "gps-cdcl"
   solver-version = 1
