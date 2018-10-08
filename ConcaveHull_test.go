@@ -12,6 +12,7 @@ import (
 	"strings"
 	"strconv"
 	"path/filepath"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCompute_convexHullInAntiClockwiseOrder(t *testing.T) {
@@ -83,8 +84,42 @@ func TestConcaveHull_segmentize (t *testing.T) {
 //go:generate git submodule init
 //go:generate git submodule update
 //go:generate git submodule foreach git pull origin master
-func Benchmark_ConcaveHull (b * testing.B) {
-	dir := "examples"
+func BenchmarkCompute_ConcaveHullSmall (b * testing.B) {
+	dir := "examples/examples"
+	err := filepath.Walk(dir, func (path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+		if !info.IsDir() && info.Name() != ".git" {
+			scanBenchmark(b, path, info)
+		}
+		return nil
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func TestCompute_ConcaveHullSmall (t * testing.T) {
+	dir := "examples/examples"
+	err := filepath.Walk(dir, func (path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+		if !info.IsDir() && info.Name() != ".git" {
+			testExample(t, path, info)
+		}
+		return nil
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func Benchmark_ConcaveHullBig (b * testing.B) {
+	dir := "examples/large-examples"
 	err := filepath.Walk(dir, func (path string, info os.FileInfo, err error) error {
 		if err != nil {
 			log.Fatal(err)
@@ -101,6 +136,47 @@ func Benchmark_ConcaveHull (b * testing.B) {
 }
 
 func scanBenchmark (b * testing.B, path string, f os.FileInfo) {
+	points := readExampleFile(path, f)
+	b.Run(path, func (b * testing.B) {
+		for n := 0; n < b.N; n++ {
+			_ = ComputeWithOptions(points, &Options{seglength: 1}) // coordinates are in a projection
+		}
+	})
+}
+
+func testExample (t * testing.T, path string, f os.FileInfo) {
+	points := readExampleFile(path, f)
+	expected := readResultFile(filepath.Join("examples-result", f.Name()))
+	t.Run(path, func (t * testing.T) {
+		concaveHull := Compute(points)
+		assert.Equal(t, expected, []float64(concaveHull))
+	})
+}
+func readResultFile(path string) []float64 {
+	file, err := os.Open(path)
+	if (err != nil) {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	var points []float64
+	for scanner.Scan() {
+		myfunc := func(c rune) bool {
+			return c == ' '
+		}
+		coordinates := strings.FieldsFunc(scanner.Text(), myfunc)
+		for _, fs := range(coordinates) {
+			f, err := strconv.ParseFloat(fs, 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+			points = append(points, f)
+		}
+	}
+	return points
+}
+
+func readExampleFile(path string, f os.FileInfo) []float64 {
 	file, err := os.Open(path)
 	if (err != nil) {
 		log.Fatal(err)
@@ -120,12 +196,7 @@ func scanBenchmark (b * testing.B, path string, f os.FileInfo) {
 			points = append(points, x, y)
 		}
 	}
-
-	b.Run(path, func (b * testing.B) {
-		for n := 0; n < b.N; n++ {
-			_ = Compute(points)
-		}
-	})
+	return points
 }
 
 

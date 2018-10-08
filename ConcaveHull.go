@@ -20,13 +20,22 @@ type concaver struct {
 	rtree * SimpleRTree.SimpleRTree
 	seglength float64
 }
+type Options struct {
+	seglength float64
+}
 func Compute (points FlatPoints) (concaveHull FlatPoints) {
+	return ComputeWithOptions(points, nil)
+}
+func ComputeWithOptions (points FlatPoints, o *Options) (concaveHull FlatPoints) {
 	sort.Sort(lexSorter(points))
-	return ComputeFromSorted(points)
+	return ComputeFromSortedWithOptions(points, o)
+}
+func ComputeFromSorted (points FlatPoints) (concaveHull FlatPoints) {
+	return ComputeFromSortedWithOptions(points, nil)
 }
 
 // Compute concave hull from sorted points. Points are expected to be sorted lexicographically by (x,y)
-func ComputeFromSorted (points FlatPoints) (concaveHull FlatPoints) {
+func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull FlatPoints) {
 	// Create a copy so that convex hull and index can modify the array in different ways
 	pointsCopy := make(FlatPoints, 0, len(points))
 	pointsCopy = append(pointsCopy, points...)
@@ -46,6 +55,9 @@ func ComputeFromSorted (points FlatPoints) (concaveHull FlatPoints) {
 	wg.Wait()
 	var c concaver
 	c.seglength = DEFAULT_SEGLENGTH
+	if o != nil && o.seglength != 0 {
+		c.seglength = o.seglength
+	}
 	c.rtree = rtree
 	return c.computeFromSorted(points)
 }
