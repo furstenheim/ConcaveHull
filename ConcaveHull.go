@@ -114,7 +114,9 @@ func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []float64) {
 			index := (item.left + item.right) / 2
 			currentX := x1 + vX * float64(index)
 			currentY := y1 + vY * float64(index)
-			x, y, _, _ := c.rtree.FindNearestPoint(currentX, currentY)
+			d1 := vX * float64(index) * vX * float64(index) + vY * float64(index) * vY * float64(index) + 0.0001
+			d2 := vX * (nSegments - float64(index)) * vX * (nSegments - float64(index)) + vY * (nSegments - float64(index)) * vY * (nSegments - float64(index)) + 0.0001
+			x, y, _, _ := c.rtree.FindNearestPointWithin(currentX, currentY, math.Min(d1, d2))
 			isNewLeft := x != closestPoints[item.lastLeft][0] || y != closestPoints[item.lastLeft][1]
 			isNewRight := x != closestPoints[item.lastRight][0] || y != closestPoints[item.lastRight][1]
 
