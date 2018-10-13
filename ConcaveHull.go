@@ -76,7 +76,7 @@ func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatP
 		if i == convexHull.Len() -1 {
 			x2, y2 = convexHull.Take(0)
 		} else {
-			x2, y2 = convexHull.Take( i + 1)
+			x2, y2 = convexHull.Take(i + 1)
 		}
 		sideSplit := c.segmentize(x1, y1, x2, y2)
 		concaveHull = append(concaveHull, sideSplit...)
