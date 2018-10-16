@@ -21,7 +21,8 @@ type concaver struct {
 	seglength float64
 }
 type Options struct {
-	seglength float64
+	Seglength float64
+	BaseArrayPool, SorterBufferPool *sync.Pool // This will be passed down to RTree useful for high concurrency server
 }
 func Compute (points FlatPoints) (concaveHull FlatPoints) {
 	return ComputeWithOptions(points, nil)
@@ -39,7 +40,13 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 	// Create a copy so that convex hull and index can modify the array in different ways
 	pointsCopy := make(FlatPoints, 0, len(points))
 	pointsCopy = append(pointsCopy, points...)
-	rtree := SimpleRTree.New()
+	var rtreeOptions SimpleRTree.Options
+	if o != nil {
+		rtreeOptions.BaseArrayPool = o.BaseArrayPool
+		rtreeOptions.SorterBufferPool = o.SorterBufferPool
+	}
+
+	rtree := SimpleRTree.NewWithOptions(rtreeOptions)
 	var wg sync.WaitGroup
 	wg.Add(2)
 	// Convex hull
@@ -55,11 +62,13 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 	wg.Wait()
 	var c concaver
 	c.seglength = DEFAULT_SEGLENGTH
-	if o != nil && o.seglength != 0 {
-		c.seglength = o.seglength
+	if o != nil && o.Seglength != 0 {
+		c.seglength = o.Seglength
 	}
 	c.rtree = rtree
-	return c.computeFromSorted(points)
+	result := c.computeFromSorted(points)
+	rtree.Destroy() // free resources
+	return result
 }
 
 func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatPoints) {

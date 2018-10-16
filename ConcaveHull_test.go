@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"path/filepath"
 	"github.com/stretchr/testify/assert"
+	"sync"
 )
 
 func TestCompute_concaveHullInAntiClockwiseOrder(t *testing.T) {
@@ -142,12 +143,18 @@ func Benchmark_ConcaveHullBig (b * testing.B) {
 
 func scanBenchmark (b * testing.B, path string, f os.FileInfo, isMemoryTest bool) {
 	points := readExampleFile(path, f)
+	baseArrayPool := &sync.Pool{}
+	sorterBufferPool := &sync.Pool{}
 	b.Run(path, func (b * testing.B) {
 		if isMemoryTest {
 			b.ReportAllocs()
 		}
 		for n := 0; n < b.N; n++ {
-			_ = ComputeWithOptions(points, &Options{seglength: 1}) // coordinates are in a projection
+			_ = ComputeWithOptions(points, &Options{
+				Seglength: 1,
+				BaseArrayPool: baseArrayPool,
+				SorterBufferPool: sorterBufferPool,
+			}) // coordinates are in a projection
 		}
 	})
 }
