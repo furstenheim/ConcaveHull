@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCompute_convexHullInAntiClockwiseOrder(t *testing.T) {
+func TestCompute_concaveHullInAntiClockwiseOrder(t *testing.T) {
 	points := FlatPoints{0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0}
 	points2 := FlatPoints{0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0., 0.}
 	result := ComputeFromSorted(points)
@@ -25,7 +25,7 @@ func TestCompute_convexHullInAntiClockwiseOrder(t *testing.T) {
 }
 
 
-func TestCompute_convexHullShuffled(t *testing.T) {
+func TestCompute_concaveHullShuffled(t *testing.T) {
 	points := FlatPoints{1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0}
 	points2 := FlatPoints{0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0., 0.}
 	result := Compute(points)
@@ -92,7 +92,12 @@ func BenchmarkCompute_ConcaveHullSmall (b * testing.B) {
 			return err
 		}
 		if !info.IsDir() && info.Name() != ".git" {
-			scanBenchmark(b, path, info)
+			b.Run("CPU", func (b *testing.B) {
+				scanBenchmark(b, path, info, false)
+			})
+			b.Run("Memory", func (b *testing.B) {
+				scanBenchmark(b, path, info, true)
+			})
 		}
 		return nil
 	})
@@ -126,7 +131,7 @@ func Benchmark_ConcaveHullBig (b * testing.B) {
 			return err
 		}
 		if !info.IsDir() && info.Name() != ".git" {
-			scanBenchmark(b, path, info)
+			scanBenchmark(b, path, info, false)
 		}
 		return nil
 	})
@@ -135,9 +140,12 @@ func Benchmark_ConcaveHullBig (b * testing.B) {
 	}
 }
 
-func scanBenchmark (b * testing.B, path string, f os.FileInfo) {
+func scanBenchmark (b * testing.B, path string, f os.FileInfo, isMemoryTest bool) {
 	points := readExampleFile(path, f)
 	b.Run(path, func (b * testing.B) {
+		if isMemoryTest {
+			b.ReportAllocs()
+		}
 		for n := 0; n < b.N; n++ {
 			_ = ComputeWithOptions(points, &Options{seglength: 1}) // coordinates are in a projection
 		}

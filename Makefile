@@ -1,7 +1,7 @@
 bench:
-	go test -v -bench=ConcaveHullSmall --benchtime=3s
+	go test -v -bench=ConcaveHullSmall/CPU --benchtime=3s
 bench-mem:
-	go test -v -bench=ConcaveHullSmall --benchtime=3s -benchmem
+	go test -v -bench=ConcaveHullSmall/Memory --benchtime=3s -benchmem
 bench-graph:
 	mkdir -p benchmarks/$$(git rev-parse HEAD)
 	go test -run=XXX -bench ConcaveHullSmall -cpuprofile benchmarks/$$(git rev-parse HEAD)/cpu.prof
