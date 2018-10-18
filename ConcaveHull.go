@@ -45,7 +45,7 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 		rtreeOptions.BaseArrayPool = o.BaseArrayPool
 		rtreeOptions.SorterBufferPool = o.SorterBufferPool
 	}
-
+	rtreeOptions.UnsafeConcurrencyMode = true // we only access from one goroutine at a time
 	rtree := SimpleRTree.NewWithOptions(rtreeOptions)
 	var wg sync.WaitGroup
 	wg.Add(2)
