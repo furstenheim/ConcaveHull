@@ -124,6 +124,40 @@ func TestCompute_ConcaveHullSmall (t * testing.T) {
 	}
 }
 
+func Benchmark_segmentize (b *testing.B) {
+	benchmarks := []struct {
+		name string
+		size int
+	}{
+		{"10", 10},
+		{"1000", 1000},
+		{"10000", 10000},
+		{"100000", 100000},
+		{"200000", 200000},
+		{"1000000", 1000000},
+	}
+	for _, bm := range benchmarks {
+		b.Run(bm.name, func(b *testing.B) {
+			size := bm.size
+			points := make([]float64, size*2)
+			for i := 0; i < 2*size; i++ {
+				points[i] = rand.Float64()
+			}
+			fp := SimpleRTree.FlatPoints(points)
+			r := SimpleRTree.NewWithOptions(SimpleRTree.Options{UnsafeConcurrencyMode: true}).Load(fp)
+			c := concaver{
+				rtree: r,
+				seglength: 0.001,
+			}
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				y1, y2 := rand.Float64(), rand.Float64()
+				_ = c.segmentize(0, y1, 0, y2)
+			}
+		})
+	}
+}
+
 func Benchmark_ConcaveHullBig (b * testing.B) {
 	dir := "examples/large-examples"
 	err := filepath.Walk(dir, func (path string, info os.FileInfo, err error) error {
