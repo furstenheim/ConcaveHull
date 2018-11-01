@@ -27,3 +27,17 @@ func (s lexSorter) Len () (int) {
 func (s lexSorter) Swap (i, j int) {
 	s[2 * i], s[2 * i + 1], s[2 * j], s[2 * j + 1] = s[2 * j], s[2 * j + 1], s[2 * i], s[2 * i + 1]
 }
+
+type closestPointSorter []closestPoint
+
+func (s closestPointSorter) Less (i, j int) bool {
+	return s[i].index < s[j].index
+}
+
+func (s closestPointSorter) Len () (int) {
+	return len(s)
+}
+
+func (s closestPointSorter) Swap (i, j int) {
+	s[i], s[j] = s[j], s[i]
+}

@@ -106,17 +106,18 @@ func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []float64) {
 	dist := math.Sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 	nSegments := math.Ceil(dist / c.seglength)
 	factor := 1 / nSegments
-	flatPoints := make([]float64, 0, int(2 * nSegments))
+	flatPoints := make([]float64, 0, int(2 * nSegments)) // alloc
 	vX := factor * (x2 - x1)
 	vY := factor * (y2 - y1)
 
-	closestPoints := make(map[int][2]float64)
-	closestPoints[0] = [2]float64{x1, y1}
-	closestPoints[int(nSegments)] = [2]float64{x2, y2}
+	closestPoints := make([]closestPoint, 0, 2)
+	closestPoints = append(closestPoints, closestPoint{index: 0, x: x1, y: y1})
+	closestPoints = append(closestPoints, closestPoint{index: int(nSegments), x: x2, y: y2})
 
+	// TODO use array for closestPoints
 	if (nSegments > 1) {
-		stack := make([]searchItem, 0)
-		stack = append(stack, searchItem{left: 0, right: int(nSegments), lastLeft: 0, lastRight: int(nSegments)})
+		stack := make([]searchItem, 0, 2)
+		stack = append(stack, searchItem{left: 0, right: int(nSegments), lastLeftIndex: 0, lastRightIndex: 1})
 		for len(stack) > 0 {
 			var item searchItem
 			item, stack = stack[len(stack)-1], stack[:len(stack)-1]
@@ -126,44 +127,54 @@ func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []float64) {
 			d1 := vX * float64(index) * vX * float64(index) + vY * float64(index) * vY * float64(index) + 0.0001
 			d2 := vX * (nSegments - float64(index)) * vX * (nSegments - float64(index)) + vY * (nSegments - float64(index)) * vY * (nSegments - float64(index)) + 0.0001
 			x, y, _, _ := c.rtree.FindNearestPointWithin(currentX, currentY, math.Min(d1, d2))
-			isNewLeft := x != closestPoints[item.lastLeft][0] || y != closestPoints[item.lastLeft][1]
-			isNewRight := x != closestPoints[item.lastRight][0] || y != closestPoints[item.lastRight][1]
+			isNewLeft := x != closestPoints[item.lastLeftIndex].x || y != closestPoints[item.lastLeftIndex].y
+			isNewRight := x != closestPoints[item.lastRightIndex].x || y != closestPoints[item.lastRightIndex].y
 
 			// we don't know the point
 			if isNewLeft && isNewRight {
-				closestPoints[index] = [2]float64{x, y}
+				newResultIndex := len(closestPoints)
+				closestPoints = append(closestPoints, closestPoint{index: index, x: x, y: y})
 				if (index - item.left 	> 1) {
-					stack = append(stack, searchItem{left: item.left, right: index, lastLeft: item.lastLeft, lastRight: index})
+					stack = append(stack, searchItem{left: item.left, right: index, lastLeftIndex: item.lastLeftIndex, lastRightIndex: newResultIndex})
 				}
 				if (item.right - index > 1) {
-					stack = append(stack, searchItem{left: index, right: item.right, lastLeft: index, lastRight: item.lastRight})
+					// alloc
+					stack = append(stack, searchItem{left: index, right: item.right, lastLeftIndex: newResultIndex, lastRightIndex: item.lastRightIndex})
 				}
 			} else if (isNewLeft) {
 				if (index - item.left > 1) {
-					stack = append(stack, searchItem{left: item.left, right: index, lastLeft: item.lastLeft, lastRight: item.lastRight})
+					stack = append(stack, searchItem{left: item.left, right: index, lastLeftIndex: item.lastLeftIndex, lastRightIndex: item.lastRightIndex})
 				}
 			} else if (isNewRight) {
 				// don't add point to closest points, but we need to keep looking on the right side
 				if (item.right - index > 1) {
-					stack = append(stack, searchItem{left: index, right: item.right, lastLeft: item.lastLeft, lastRight: item.lastRight})
+					stack = append(stack, searchItem{left: index, right: item.right, lastLeftIndex: item.lastLeftIndex, lastRightIndex: item.lastRightIndex})
 				}
 			}
 		}
 	}
-	// always add last point of the segment
-	for i := 1; i <= int(nSegments); i++ {
-		point, ok := closestPoints[i]
-		if (ok) {
-			flatPoints = append(flatPoints, point[0], point[1])
+	sort.Sort(closestPointSorter(closestPoints))
+	for i, point := range(closestPoints) {
+		// always add last point of the segment
+		if i > 0 {
+			flatPoints = append(flatPoints, point.x, point.y)
 		}
+
 	}
 	return flatPoints
 }
 
+type closestPoint struct {
+	index int
+	x, y float64
+}
+
 type searchItem struct {
-	left, right, lastLeft, lastRight int
+	left, right, lastLeftIndex, lastRightIndex int
 
 }
+
+
 
 
 
