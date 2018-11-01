@@ -19,6 +19,8 @@ const DEFAULT_SEGLENGTH = 0.001
 type concaver struct {
 	rtree * SimpleRTree.SimpleRTree
 	seglength float64
+	closestPointsMem []closestPoint
+	searchItemsMem []searchItem
 }
 type Options struct {
 	Seglength float64
@@ -66,6 +68,8 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 		c.seglength = o.Seglength
 	}
 	c.rtree = rtree
+	c.closestPointsMem = make([]closestPoint, 0 , 2)
+	c.searchItemsMem = make([]searchItem, 0 , 2)
 	result := c.computeFromSorted(points)
 	rtree.Destroy() // free resources
 	return result
@@ -88,7 +92,9 @@ func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatP
 			x2, y2 = convexHull.Take(i + 1)
 		}
 		sideSplit := c.segmentize(x1, y1, x2, y2)
-		concaveHull = append(concaveHull, sideSplit...)
+		for _, p := range(sideSplit) {
+			concaveHull = append(concaveHull, p.x, p.y)
+		}
 	}
 	path := reducers.DouglasPeucker(geo.NewPathFromFlatXYData(concaveHull), c.seglength)
 	// reused allocated array
@@ -102,21 +108,20 @@ func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatP
 }
 
 // Split side in small edges, for each edge find closest point. Remove duplicates
-func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []float64) {
+func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []closestPoint) {
 	dist := math.Sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 	nSegments := math.Ceil(dist / c.seglength)
 	factor := 1 / nSegments
-	flatPoints := make([]float64, 0, int(2 * nSegments)) // alloc
 	vX := factor * (x2 - x1)
 	vY := factor * (y2 - y1)
 
-	closestPoints := make([]closestPoint, 0, 2)
+	closestPoints := c.closestPointsMem[0: 0]
 	closestPoints = append(closestPoints, closestPoint{index: 0, x: x1, y: y1})
 	closestPoints = append(closestPoints, closestPoint{index: int(nSegments), x: x2, y: y2})
 
 	// TODO use array for closestPoints
+	stack := c.searchItemsMem[0: 0]
 	if (nSegments > 1) {
-		stack := make([]searchItem, 0, 2)
 		stack = append(stack, searchItem{left: 0, right: int(nSegments), lastLeftIndex: 0, lastRightIndex: 1})
 		for len(stack) > 0 {
 			var item searchItem
@@ -154,14 +159,9 @@ func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []float64) {
 		}
 	}
 	sort.Sort(closestPointSorter(closestPoints))
-	for i, point := range(closestPoints) {
-		// always add last point of the segment
-		if i > 0 {
-			flatPoints = append(flatPoints, point.x, point.y)
-		}
-
-	}
-	return flatPoints
+	c.searchItemsMem = stack
+	c.closestPointsMem = closestPoints
+	return closestPoints[1:]
 }
 
 type closestPoint struct {

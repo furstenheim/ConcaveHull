@@ -64,7 +64,8 @@ func TestConcaveHull_segmentize (t *testing.T) {
 	r := SimpleRTree.New().Load(SimpleRTree.FlatPoints(fp))
 	c := new(concaver)
 	c.rtree = r
-
+	c.closestPointsMem = make([]closestPoint, 0 , 2)
+	c.searchItemsMem = make([]searchItem, 0 , 2)
 
 	c.seglength = DEFAULT_SEGLENGTH
 
@@ -73,7 +74,11 @@ func TestConcaveHull_segmentize (t *testing.T) {
 		index2 := rand.Intn(size)
 		x1, y1 := fp.Take(index1)
 		x2, y2 := fp.Take(index2)
-		p1 := c.segmentize(x1, y1, x2, y2)
+		closestPoints := c.segmentize(x1, y1, x2, y2)
+		p1 := make([]float64, 0, 2 * len(closestPoints))
+		for _, cp := range(closestPoints) {
+			p1 = append(p1, cp.x, cp.y)
+		}
 		p2 := c.segmentizeLinear(x1, y1, x2, y2)
 		fmt.Println(x1, y1, x2, y2)
 		fmt.Println(p1)
