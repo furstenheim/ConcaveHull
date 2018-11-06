@@ -184,6 +184,8 @@ func scanBenchmark (b * testing.B, path string, f os.FileInfo, isMemoryTest bool
 	points := readExampleFile(path, f)
 	baseArrayPool := &sync.Pool{}
 	sorterBufferPool := &sync.Pool{}
+	searchStackPool := &sync.Pool{}
+	closestPointPool := &sync.Pool{}
 	b.Run(path, func (b * testing.B) {
 		if isMemoryTest {
 			b.ReportAllocs()
@@ -193,6 +195,9 @@ func scanBenchmark (b * testing.B, path string, f os.FileInfo, isMemoryTest bool
 				Seglength: 1,
 				BaseArrayPool: baseArrayPool,
 				SorterBufferPool: sorterBufferPool,
+				SearchStackPool: searchStackPool,
+				ClosestPointPool: closestPointPool,
+				EstimatedRatioConcaveConvex: 4,
 			}) // coordinates are in a projection
 		}
 	})

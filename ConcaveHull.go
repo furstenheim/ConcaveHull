@@ -19,12 +19,15 @@ const DEFAULT_SEGLENGTH = 0.001
 type concaver struct {
 	rtree * SimpleRTree.SimpleRTree
 	seglength float64
+	options *Options
 	closestPointsMem []closestPoint
 	searchItemsMem []searchItem
 }
 type Options struct {
 	Seglength float64
+	EstimatedRatioConcaveConvex int // estimated ratio of number of points between concave and convex hull. Will be used to allocate
 	BaseArrayPool, SorterBufferPool *sync.Pool // This will be passed down to RTree useful for high concurrency server
+	ClosestPointPool, SearchStackPool *sync.Pool
 }
 func Compute (points FlatPoints) (concaveHull FlatPoints) {
 	return ComputeWithOptions(points, nil)
@@ -68,10 +71,40 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 		c.seglength = o.Seglength
 	}
 	c.rtree = rtree
-	c.closestPointsMem = make([]closestPoint, 0 , 2)
-	c.searchItemsMem = make([]searchItem, 0 , 2)
+	var isClosestPointSet bool
+	if o != nil && o.ClosestPointPool != nil {
+		closestPointMemCandidate := o.ClosestPointPool.Get()
+		if closestPointMemCandidate != nil {
+			isClosestPointSet = true
+			c.closestPointsMem = closestPointMemCandidate.([]closestPoint)
+		}
+
+	}
+	if !isClosestPointSet {
+		c.closestPointsMem = make([]closestPoint, 0 , 2)
+	}
+
+	var isSearchItemsSet bool
+	if o != nil && o.SearchStackPool != nil {
+		searchItemsCandidate := o.SearchStackPool.Get()
+		if searchItemsCandidate != nil {
+			isSearchItemsSet = true
+			c.searchItemsMem = searchItemsCandidate.([]searchItem)
+		}
+
+	}
+	if !isSearchItemsSet {
+		c.searchItemsMem = make([]searchItem, 0 , 2)
+	}
+
 	result := c.computeFromSorted(points)
 	rtree.Destroy() // free resources
+	if o != nil && o.SearchStackPool != nil {
+		o.SearchStackPool.Put(c.searchItemsMem)
+	}
+	if o != nil && o.ClosestPointPool != nil {
+		o.ClosestPointPool.Put(c.closestPointsMem)
+	}
 	return result
 }
 
@@ -80,7 +113,11 @@ func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatP
 	if (convexHull.Len() < 3) {
 		return convexHull
 	}
-	concaveHull = make([]float64, 0, 2 * convexHull.Len())
+	estimatedProportionConcave2Convex := 4
+	if c.options != nil && c.options.EstimatedRatioConcaveConvex != 0 {
+		estimatedProportionConcave2Convex = c.options.EstimatedRatioConcaveConvex
+	}
+	concaveHull = make([]float64, 0, 2 * convexHull.Len() * estimatedProportionConcave2Convex)
 	x0, y0 := convexHull.Take(0)
 	concaveHull = append(concaveHull, x0, y0)
 	for i := 0; i<convexHull.Len(); i++ {
@@ -135,6 +172,7 @@ func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []closestPoint) 
 		fIndex := float64(index)
 		currentX := x1 + vX * fIndex
 		currentY := y1 + vY * fIndex
+
 		d1 := vX * fIndex * vX * fIndex + vY * fIndex * vY * fIndex + 0.0001
 		d2 := vX * (nSegments - fIndex) * vX * (nSegments - fIndex) + vY * (nSegments - fIndex) * vY * (nSegments - fIndex) + 0.0001
 		x, y, _, _ := c.rtree.FindNearestPointWithin(currentX, currentY, math.Min(d1, d2))
@@ -150,7 +188,7 @@ func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []closestPoint) 
 			stack = append(stack, searchItem{left: index, right: item.right, lastLeftIndex: newResultIndex, lastRightIndex: item.lastRightIndex})
 		} else if (isNewLeft) {
 			stack = append(stack, searchItem{left: item.left, right: index, lastLeftIndex: item.lastLeftIndex, lastRightIndex: item.lastRightIndex})
-		} else if (isNewRight) {
+		} else {
 			// don't add point to closest points, but we need to keep looking on the right side
 			stack = append(stack, searchItem{left: index, right: item.right, lastLeftIndex: item.lastLeftIndex, lastRightIndex: item.lastRightIndex})
 		}
