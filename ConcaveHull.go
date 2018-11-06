@@ -119,43 +119,40 @@ func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []closestPoint) 
 	closestPoints = append(closestPoints, closestPoint{index: 0, x: x1, y: y1})
 	closestPoints = append(closestPoints, closestPoint{index: int(nSegments), x: x2, y: y2})
 
-	// TODO use array for closestPoints
-	stack := c.searchItemsMem[0: 0]
-	if (nSegments > 1) {
-		stack = append(stack, searchItem{left: 0, right: int(nSegments), lastLeftIndex: 0, lastRightIndex: 1})
-		for len(stack) > 0 {
-			var item searchItem
-			item, stack = stack[len(stack)-1], stack[:len(stack)-1]
-			index := (item.left + item.right) / 2
-			currentX := x1 + vX * float64(index)
-			currentY := y1 + vY * float64(index)
-			d1 := vX * float64(index) * vX * float64(index) + vY * float64(index) * vY * float64(index) + 0.0001
-			d2 := vX * (nSegments - float64(index)) * vX * (nSegments - float64(index)) + vY * (nSegments - float64(index)) * vY * (nSegments - float64(index)) + 0.0001
-			x, y, _, _ := c.rtree.FindNearestPointWithin(currentX, currentY, math.Min(d1, d2))
-			isNewLeft := x != closestPoints[item.lastLeftIndex].x || y != closestPoints[item.lastLeftIndex].y
-			isNewRight := x != closestPoints[item.lastRightIndex].x || y != closestPoints[item.lastRightIndex].y
+	if (nSegments < 2) {
+		return closestPoints[1:]
+	}
 
-			// we don't know the point
-			if isNewLeft && isNewRight {
-				newResultIndex := len(closestPoints)
-				closestPoints = append(closestPoints, closestPoint{index: index, x: x, y: y})
-				if (index - item.left 	> 1) {
-					stack = append(stack, searchItem{left: item.left, right: index, lastLeftIndex: item.lastLeftIndex, lastRightIndex: newResultIndex})
-				}
-				if (item.right - index > 1) {
-					// alloc
-					stack = append(stack, searchItem{left: index, right: item.right, lastLeftIndex: newResultIndex, lastRightIndex: item.lastRightIndex})
-				}
-			} else if (isNewLeft) {
-				if (index - item.left > 1) {
-					stack = append(stack, searchItem{left: item.left, right: index, lastLeftIndex: item.lastLeftIndex, lastRightIndex: item.lastRightIndex})
-				}
-			} else if (isNewRight) {
-				// don't add point to closest points, but we need to keep looking on the right side
-				if (item.right - index > 1) {
-					stack = append(stack, searchItem{left: index, right: item.right, lastLeftIndex: item.lastLeftIndex, lastRightIndex: item.lastRightIndex})
-				}
-			}
+	stack := c.searchItemsMem[0: 0]
+	stack = append(stack, searchItem{left: 0, right: int(nSegments), lastLeftIndex: 0, lastRightIndex: 1})
+	for len(stack) > 0 {
+		var item searchItem
+		item, stack = stack[len(stack)-1], stack[:len(stack)-1]
+		if item.right - item.left <= 1 {
+			continue
+		}
+		index := (item.left + item.right) / 2
+		fIndex := float64(index)
+		currentX := x1 + vX * fIndex
+		currentY := y1 + vY * fIndex
+		d1 := vX * fIndex * vX * fIndex + vY * fIndex * vY * fIndex + 0.0001
+		d2 := vX * (nSegments - fIndex) * vX * (nSegments - fIndex) + vY * (nSegments - fIndex) * vY * (nSegments - fIndex) + 0.0001
+		x, y, _, _ := c.rtree.FindNearestPointWithin(currentX, currentY, math.Min(d1, d2))
+		isNewLeft := x != closestPoints[item.lastLeftIndex].x || y != closestPoints[item.lastLeftIndex].y
+		isNewRight := x != closestPoints[item.lastRightIndex].x || y != closestPoints[item.lastRightIndex].y
+
+		// we don't know the point
+		if isNewLeft && isNewRight {
+			newResultIndex := len(closestPoints)
+			closestPoints = append(closestPoints, closestPoint{index: index, x: x, y: y})
+			stack = append(stack, searchItem{left: item.left, right: index, lastLeftIndex: item.lastLeftIndex, lastRightIndex: newResultIndex})
+			// alloc
+			stack = append(stack, searchItem{left: index, right: item.right, lastLeftIndex: newResultIndex, lastRightIndex: item.lastRightIndex})
+		} else if (isNewLeft) {
+			stack = append(stack, searchItem{left: item.left, right: index, lastLeftIndex: item.lastLeftIndex, lastRightIndex: item.lastRightIndex})
+		} else if (isNewRight) {
+			// don't add point to closest points, but we need to keep looking on the right side
+			stack = append(stack, searchItem{left: index, right: item.right, lastLeftIndex: item.lastLeftIndex, lastRightIndex: item.lastRightIndex})
 		}
 	}
 	sort.Sort(closestPointSorter(closestPoints))
