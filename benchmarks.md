@@ -2,23 +2,22 @@ BenchmarkCompute_ConcaveHullSmall/Memory/examples/examples/1-kwanyamazane.txt-4 
 BenchmarkCompute_ConcaveHullSmall/Memory#01/examples/examples/2-DT71_045.txt-4          	     300	  12909776 ns/op	 1687006 B/op	    1574 allocs/op
 BenchmarkCompute_ConcaveHullSmall/Memory#02/examples/examples/3-table-mountain.txt-4    	     100	  44058168 ns/op	 6219276 B/op	    6542 allocs/op
 BenchmarkCompute_ConcaveHullSmall/Memory#03/examples/examples/4-camps-drift.txt-4       	      20	 202423581 ns/op	30779302 B/op	   35083 allocs/op
-BenchmarkCompute_ConcaveHullSmall/CPU/examples/examples/1-kwanyamazane.txt-4         	    5000	    928985 ns/op
-BenchmarkCompute_ConcaveHullSmall/CPU#01/examples/examples/2-DT71_045.txt-4          	     300	  16213524 ns/op
-BenchmarkCompute_ConcaveHullSmall/CPU#02/examples/examples/3-table-mountain.txt-4    	     100	  43302014 ns/op
-BenchmarkCompute_ConcaveHullSmall/CPU#03/examples/examples/4-camps-drift.txt-4       	      20	 199848955 ns/op
+BenchmarkCompute_ConcaveHullSmall/CPU/examples/examples/1-kwanyamazane.txt-4         	   10000	    701013 ns/op
+BenchmarkCompute_ConcaveHullSmall/CPU#01/examples/examples/2-DT71_045.txt-4          	     300	  12040138 ns/op
+BenchmarkCompute_ConcaveHullSmall/CPU#02/examples/examples/3-table-mountain.txt-4    	     100	  41317806 ns/op
+BenchmarkCompute_ConcaveHullSmall/CPU#03/examples/examples/4-camps-drift.txt-4       	      20	 193270383 ns/op
 Benchmark_segmentize/10-4         	 2000000	      2040 ns/op	      32 B/op	       1 allocs/op
 Benchmark_segmentize/1000-4       	  100000	     43740 ns/op	      32 B/op	       1 allocs/op
 Benchmark_segmentize/10000-4      	   30000	    118757 ns/op	      32 B/op	       1 allocs/op
 Benchmark_segmentize/100000-4     	   20000	    296641 ns/op	      33 B/op	       1 allocs/op
 Benchmark_segmentize/200000-4     	   10000	    369429 ns/op	      34 B/op	       1 allocs/op
 Benchmark_segmentize/1000000-4    	   10000	    503184 ns/op	      37 B/op	       1 allocs/op
-Benchmark_segmentize/10-4         	 2000000	      2249 ns/op
-Benchmark_segmentize/1000-4       	  100000	     43090 ns/op
-Benchmark_segmentize/10000-4      	   30000	    116241 ns/op
-Benchmark_segmentize/100000-4     	   20000	    306930 ns/op
-Benchmark_segmentize/200000-4     	   10000	    356817 ns/op
-Benchmark_segmentize/1000000-4    	   10000	    510359 ns/op
-
+Benchmark_segmentize/10-4         	 2000000	      1988 ns/op
+Benchmark_segmentize/1000-4       	  100000	     39105 ns/op
+Benchmark_segmentize/10000-4      	   50000	     93921 ns/op
+Benchmark_segmentize/100000-4     	   20000	    232279 ns/op
+Benchmark_segmentize/200000-4     	   20000	    285576 ns/op
+Benchmark_segmentize/1000000-4    	   10000	    403147 ns/op
 
 
 

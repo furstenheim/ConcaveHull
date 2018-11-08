@@ -17,9 +17,9 @@ It builds a Concave Hull around the points but it is not an [alpha shape](https:
 
 ### Performance
 
-The following benchmark was run on example 4 from [this website](https://www.codeproject.com/Articles/1201438/The-Concave-Hull-of-a-Set-of-Points). It took 0.22s to build the concave hull. The benchmark was done in a i5 2.50GHz 8Gb of RAM running on Linux
+The following benchmark was run on example 4 from [this website](https://www.codeproject.com/Articles/1201438/The-Concave-Hull-of-a-Set-of-Points). It took 0.19s to build the concave hull. The benchmark was done in a i5 2.50GHz 8Gb of RAM running on Linux
 
-    BenchmarkCompute_ConcaveHullSmall/examples/examples/4-camps-drift.txt-4                      20         215320346 ns/op
+    BenchmarkCompute_ConcaveHullSmall/CPU#03/examples/examples/4-camps-drift.txt-4       	      20	 193270383 ns/op
 
 ![Concave hull of a network](./example.png?raw=true "Concave Hull")
 

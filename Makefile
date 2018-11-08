@@ -2,6 +2,9 @@ bench:
 	go test -v -bench=ConcaveHullSmall/CPU --benchtime=3s
 bench-mem:
 	go test -v -bench=ConcaveHullSmall/Memory --benchtime=3s -benchmem
+bench-mem-trace:
+	go test -c
+	GODEBUG=allocfreetrace=1 ./ConcaveHull.test -test.run=none -test.benchtime=10ms -test.bench=ConcaveHullSmall/Memory#03/examples/examples/4-camps-drift.txt 2>trace.log
 bench-graph:
 	mkdir -p benchmarks/$$(git rev-parse HEAD)
 	go test -run=XXX -bench ConcaveHullSmall -cpuprofile benchmarks/$$(git rev-parse HEAD)/cpu.prof
