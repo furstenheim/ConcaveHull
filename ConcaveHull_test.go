@@ -184,21 +184,19 @@ func scanBenchmark (b * testing.B, path string, f os.FileInfo, isMemoryTest bool
 	points := readExampleFile(path, f)
 	baseArrayPool := &sync.Pool{}
 	sorterBufferPool := &sync.Pool{}
-	searchStackPool := &sync.Pool{}
-	closestPointPool := &sync.Pool{}
+	concaveHullPool := &sync.Pool{}
 	b.Run(path, func (b * testing.B) {
 		if isMemoryTest {
 			b.ReportAllocs()
 		}
 		for n := 0; n < b.N; n++ {
 			_ = ComputeWithOptions(points, &Options{
-				Seglength: 1,
+				Seglength: 1, // coordinates are in a projection
 				BaseArrayPool: baseArrayPool,
 				SorterBufferPool: sorterBufferPool,
-				SearchStackPool: searchStackPool,
-				ClosestPointPool: closestPointPool,
+				ConcaveHullPool: concaveHullPool,
 				EstimatedRatioConcaveConvex: 4,
-			}) // coordinates are in a projection
+			})
 		}
 	})
 }
@@ -206,9 +204,25 @@ func scanBenchmark (b * testing.B, path string, f os.FileInfo, isMemoryTest bool
 func testExample (t * testing.T, path string, f os.FileInfo) {
 	points := readExampleFile(path, f)
 	expected := readResultFile(filepath.Join("examples-result", f.Name()))
+	baseArrayPool := &sync.Pool{}
+	sorterBufferPool := &sync.Pool{}
+	concaveHullPool := &sync.Pool{}
 	t.Run(path, func (t * testing.T) {
-		concaveHull := Compute(points)
-		assert.Equal(t, expected, []float64(concaveHull))
+		concaveHull1 := ComputeWithOptions(points, &Options{
+			BaseArrayPool: baseArrayPool,
+			SorterBufferPool: sorterBufferPool,
+			ConcaveHullPool: concaveHullPool,
+			EstimatedRatioConcaveConvex: 4,
+		})
+		assert.Equal(t, expected, []float64(concaveHull1))
+		// Check that pools are cleaned correctly
+		concaveHull2 := ComputeWithOptions(points, &Options{
+			BaseArrayPool: baseArrayPool,
+			SorterBufferPool: sorterBufferPool,
+			ConcaveHullPool: concaveHullPool,
+			EstimatedRatioConcaveConvex: 4,
+		})
+		assert.Equal(t, expected, []float64(concaveHull2))
 	})
 }
 func readResultFile(path string) []float64 {

@@ -2,7 +2,6 @@ package ConcaveHull
 
 type flatPointsBuffer struct {
 	arrays [][]float64
-	currentCap int
 	currentIndex int
 }
 
@@ -13,7 +12,6 @@ func makeFlatPointBuffer (size int) flatPointsBuffer {
 	fpb := flatPointsBuffer{
 		arrays: arrays,
 		currentIndex: 0,
-		currentCap: 1,
 	}
 	return fpb
 }
@@ -22,9 +20,7 @@ func (fpb *flatPointsBuffer) addFloat (x float64) {
 	currentArray := fpb.arrays[fpb.currentIndex]
 	if len(currentArray) == cap(currentArray) {
 		fpb.currentIndex++
-		if fpb.currentIndex >= fpb.currentCap {
-			fpb.arrays = append(fpb.arrays, make([]float64, 0, 2 * cap(currentArray)))
-		}
+		fpb.arrays = append(fpb.arrays, make([]float64, 0, 2 * cap(currentArray)))
 	}
 	fpb.arrays[fpb.currentIndex] = append(fpb.arrays[fpb.currentIndex], x)
 }
@@ -39,6 +35,12 @@ func (fpb *flatPointsBuffer) toFloatArray () []float64 {
 		result = append(result, fpb.arrays[i]...)
 	}
 	return result
+}
+
+func (fpb * flatPointsBuffer) reset () {
+	fpb.currentIndex = 0
+	fpb.arrays[0] = fpb.arrays[len(fpb.arrays) - 1][0:0] // keep longest array
+	fpb.arrays = fpb.arrays[0: 1]
 }
 
 

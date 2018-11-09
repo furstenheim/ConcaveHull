@@ -22,12 +22,19 @@ type concaver struct {
 	options *Options
 	closestPointsMem []closestPoint
 	searchItemsMem []searchItem
+	flatPointBuffer flatPointsBuffer
 }
 type Options struct {
 	Seglength float64
 	EstimatedRatioConcaveConvex int // estimated ratio of number of points between concave and convex hull. Will be used to allocate
 	BaseArrayPool, SorterBufferPool *sync.Pool // This will be passed down to RTree useful for high concurrency server
-	ClosestPointPool, SearchStackPool *sync.Pool
+	ConcaveHullPool *sync.Pool
+}
+
+type concaveHullPoolElement struct {
+	fpbMem flatPointsBuffer
+	closestPointsMem []closestPoint
+	searchItemsMem []searchItem
 }
 func Compute (points FlatPoints) (concaveHull FlatPoints) {
 	return ComputeWithOptions(points, nil)
@@ -71,39 +78,42 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 		c.seglength = o.Seglength
 	}
 	c.rtree = rtree
-	var isClosestPointSet bool
-	if o != nil && o.ClosestPointPool != nil {
-		closestPointMemCandidate := o.ClosestPointPool.Get()
-		if closestPointMemCandidate != nil {
-			isClosestPointSet = true
-			c.closestPointsMem = closestPointMemCandidate.([]closestPoint)
+	var isConcaveHullPoolElementsSet bool
+	if o != nil && o.ConcaveHullPool != nil {
+		concaveHullPoolElementsCandidate := o.ConcaveHullPool.Get()
+		if concaveHullPoolElementsCandidate != nil {
+			isConcaveHullPoolElementsSet = true
+			el := concaveHullPoolElementsCandidate.(*concaveHullPoolElement)
+			c.closestPointsMem = el.closestPointsMem
+			c.searchItemsMem = el.searchItemsMem
+			c.flatPointBuffer = el.fpbMem
+			c.flatPointBuffer.reset()
+
 		}
 
 	}
-	if !isClosestPointSet {
+	if !isConcaveHullPoolElementsSet {
 		c.closestPointsMem = make([]closestPoint, 0 , 2)
-	}
-
-	var isSearchItemsSet bool
-	if o != nil && o.SearchStackPool != nil {
-		searchItemsCandidate := o.SearchStackPool.Get()
-		if searchItemsCandidate != nil {
-			isSearchItemsSet = true
-			c.searchItemsMem = searchItemsCandidate.([]searchItem)
-		}
-
-	}
-	if !isSearchItemsSet {
 		c.searchItemsMem = make([]searchItem, 0 , 2)
+		estimatedProportionConcave2Convex := 4
+		if c.options != nil && c.options.EstimatedRatioConcaveConvex != 0 {
+			estimatedProportionConcave2Convex = c.options.EstimatedRatioConcaveConvex
+		}
+		c.flatPointBuffer = makeFlatPointBuffer(2 * points.Len() * estimatedProportionConcave2Convex)
+
+
 	}
 
 	result := c.computeFromSorted(points)
 	rtree.Destroy() // free resources
-	if o != nil && o.SearchStackPool != nil {
-		o.SearchStackPool.Put(c.searchItemsMem)
-	}
-	if o != nil && o.ClosestPointPool != nil {
-		o.ClosestPointPool.Put(c.closestPointsMem)
+	if o != nil && o.ConcaveHullPool != nil {
+		o.ConcaveHullPool.Put(
+			&concaveHullPoolElement{
+				searchItemsMem: c.searchItemsMem,
+				closestPointsMem: c.closestPointsMem,
+				fpbMem: c.flatPointBuffer,
+			},
+		)
 	}
 	return result
 }
@@ -113,12 +123,9 @@ func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatP
 	if (convexHull.Len() < 3) {
 		return convexHull
 	}
-	estimatedProportionConcave2Convex := 4
-	if c.options != nil && c.options.EstimatedRatioConcaveConvex != 0 {
-		estimatedProportionConcave2Convex = c.options.EstimatedRatioConcaveConvex
-	}
-	concaveHullBuffer := makeFlatPointBuffer(2 * convexHull.Len() * estimatedProportionConcave2Convex)
+
 	x0, y0 := convexHull.Take(0)
+	concaveHullBuffer := c.flatPointBuffer
 	concaveHullBuffer.addFloat(x0)
 	concaveHullBuffer.addFloat(y0)
 	for i := 0; i<convexHull.Len(); i++ {
