@@ -117,9 +117,10 @@ func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatP
 	if c.options != nil && c.options.EstimatedRatioConcaveConvex != 0 {
 		estimatedProportionConcave2Convex = c.options.EstimatedRatioConcaveConvex
 	}
-	concaveHull = make([]float64, 0, 2 * convexHull.Len() * estimatedProportionConcave2Convex)
+	concaveHullBuffer := makeFlatPointBuffer(2 * convexHull.Len() * estimatedProportionConcave2Convex)
 	x0, y0 := convexHull.Take(0)
-	concaveHull = append(concaveHull, x0, y0)
+	concaveHullBuffer.addFloat(x0)
+	concaveHullBuffer.addFloat(y0)
 	for i := 0; i<convexHull.Len(); i++ {
 		x1, y1 := convexHull.Take(i)
 		var x2, y2 float64
@@ -130,9 +131,11 @@ func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatP
 		}
 		sideSplit := c.segmentize(x1, y1, x2, y2)
 		for _, p := range(sideSplit) {
-			concaveHull = append(concaveHull, p.x, p.y)
+			concaveHullBuffer.addFloat(p.x)
+			concaveHullBuffer.addFloat(p.y)
 		}
 	}
+	concaveHull = concaveHullBuffer.toFloatArray()
 	path := reducers.DouglasPeucker(geo.NewPathFromFlatXYData(concaveHull), c.seglength)
 	// reused allocated array
 	concaveHull = concaveHull[0:0]
