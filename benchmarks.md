@@ -1,11 +1,11 @@
-BenchmarkCompute_ConcaveHullSmall/Memory/examples/examples/1-kwanyamazane.txt-4         	    5000	    827614 ns/op	   67268 B/op	     139 allocs/op
-BenchmarkCompute_ConcaveHullSmall/Memory#01/examples/examples/2-DT71_045.txt-4          	     300	  13441575 ns/op	 1856498 B/op	    1573 allocs/op
-BenchmarkCompute_ConcaveHullSmall/Memory#02/examples/examples/3-table-mountain.txt-4    	     100	  43315020 ns/op	 6219412 B/op	    6538 allocs/op
-BenchmarkCompute_ConcaveHullSmall/Memory#03/examples/examples/4-camps-drift.txt-4       	      20	 205300274 ns/op	30780223 B/op	   35081 allocs/op
-BenchmarkCompute_ConcaveHullSmall/CPU/examples/examples/1-kwanyamazane.txt-4         	   10000	    781457 ns/op
-BenchmarkCompute_ConcaveHullSmall/CPU#01/examples/examples/2-DT71_045.txt-4          	     300	  13978361 ns/op
-BenchmarkCompute_ConcaveHullSmall/CPU#02/examples/examples/3-table-mountain.txt-4    	     100	  38889267 ns/op
-BenchmarkCompute_ConcaveHullSmall/CPU#03/examples/examples/4-camps-drift.txt-4       	      20	 209564566 ns/op
+BenchmarkCompute_ConcaveHullSmall/Memory/examples/examples/1-kwanyamazane.txt-4         	   10000	    838254 ns/op	   64394 B/op	      49 allocs/op
+BenchmarkCompute_ConcaveHullSmall/Memory#01/examples/examples/2-DT71_045.txt-4          	     300	  13240810 ns/op	 1638770 B/op	      60 allocs/op
+BenchmarkCompute_ConcaveHullSmall/Memory#02/examples/examples/3-table-mountain.txt-4    	     100	  42670180 ns/op	 6012036 B/op	      58 allocs/op
+BenchmarkCompute_ConcaveHullSmall/Memory#03/examples/examples/4-camps-drift.txt-4       	      20	 192653255 ns/op	28158832 B/op	      87 allocs/op
+BenchmarkCompute_ConcaveHullSmall/CPU/examples/examples/1-kwanyamazane.txt-4         	   10000	    793102 ns/op
+BenchmarkCompute_ConcaveHullSmall/CPU#01/examples/examples/2-DT71_045.txt-4          	     300	  12184084 ns/op
+BenchmarkCompute_ConcaveHullSmall/CPU#02/examples/examples/3-table-mountain.txt-4    	     100	  37699207 ns/op
+BenchmarkCompute_ConcaveHullSmall/CPU#03/examples/examples/4-camps-drift.txt-4       	      20	 197968213 ns/op
 Benchmark_segmentize/10-4         	 2000000	      2040 ns/op	      32 B/op	       1 allocs/op
 Benchmark_segmentize/1000-4       	  100000	     43740 ns/op	      32 B/op	       1 allocs/op
 Benchmark_segmentize/10000-4      	   30000	    118757 ns/op	      32 B/op	       1 allocs/op
