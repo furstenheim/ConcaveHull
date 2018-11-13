@@ -12,7 +12,7 @@ bench-graph:
 bench-mem-alloc-graph:
 	mkdir -p benchmarks/$$(git rev-parse HEAD)
 	go test -run=XXX -bench ConcaveHullSmall -memprofile benchmarks/$$(git rev-parse HEAD)/heap.prof
-	go tool pprof -lines -sample_index=alloc_objects -gif ConcaveHull.test benchmarks/$(git rev-parse HEAD)/heap.prof > benchmarks/$(git rev-parse HEAD)/heap.gif
+	go tool pprof -lines -sample_index=alloc_objects -gif ConcaveHull.test benchmarks/$$(git rev-parse HEAD)/heap.prof > benchmarks/$$(git rev-parse HEAD)/heap.gif
 
 bench-segmentize:
 	go test -v -bench=segmentize --benchtime=3s

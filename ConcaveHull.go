@@ -23,11 +23,11 @@ type concaver struct {
 	closestPointsMem []closestPoint
 	searchItemsMem []searchItem
 	flatPointBuffer flatPointsBuffer
+	rtreePool *sync.Pool
 }
 type Options struct {
 	Seglength float64
 	EstimatedRatioConcaveConvex int // estimated ratio of number of points between concave and convex hull. Will be used to allocate
-	BaseArrayPool, SorterBufferPool *sync.Pool // This will be passed down to RTree useful for high concurrency server
 	ConcaveHullPool *sync.Pool
 }
 
@@ -35,6 +35,7 @@ type concaveHullPoolElement struct {
 	fpbMem flatPointsBuffer
 	closestPointsMem []closestPoint
 	searchItemsMem []searchItem
+	rtreePool *sync.Pool // This will be passed down to rtree
 }
 func Compute (points FlatPoints) (concaveHull FlatPoints) {
 	return ComputeWithOptions(points, nil)
@@ -53,10 +54,21 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 	pointsCopy := make(FlatPoints, 0, len(points))
 	pointsCopy = append(pointsCopy, points...)
 	var rtreeOptions SimpleRTree.Options
-	if o != nil {
-		rtreeOptions.BaseArrayPool = o.BaseArrayPool
-		rtreeOptions.SorterBufferPool = o.SorterBufferPool
+	var isConcaveHullPoolElementsSet bool
+	var poolEl *concaveHullPoolElement
+	var rtreePool *sync.Pool
+	if o != nil && o.ConcaveHullPool != nil {
+		concaveHullPoolElementsCandidate := o.ConcaveHullPool.Get()
+		if concaveHullPoolElementsCandidate != nil {
+			isConcaveHullPoolElementsSet = true
+			poolEl = concaveHullPoolElementsCandidate.(*concaveHullPoolElement)
+			rtreePool = poolEl.rtreePool
+		} else {
+			rtreePool = &sync.Pool{} // If we are given a pool we want to initiate caching
+		}
+
 	}
+	rtreeOptions.RTreePool = rtreePool
 	rtreeOptions.UnsafeConcurrencyMode = true // we only access from one goroutine at a time
 	rtree := SimpleRTree.NewWithOptions(rtreeOptions)
 	var wg sync.WaitGroup
@@ -78,18 +90,12 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 		c.seglength = o.Seglength
 	}
 	c.rtree = rtree
-	var isConcaveHullPoolElementsSet bool
-	if o != nil && o.ConcaveHullPool != nil {
-		concaveHullPoolElementsCandidate := o.ConcaveHullPool.Get()
-		if concaveHullPoolElementsCandidate != nil {
+	if isConcaveHullPoolElementsSet {
 			isConcaveHullPoolElementsSet = true
-			el := concaveHullPoolElementsCandidate.(*concaveHullPoolElement)
-			c.closestPointsMem = el.closestPointsMem
-			c.searchItemsMem = el.searchItemsMem
-			c.flatPointBuffer = el.fpbMem
+			c.closestPointsMem = poolEl.closestPointsMem
+			c.searchItemsMem = poolEl.searchItemsMem
+			c.flatPointBuffer = poolEl.fpbMem
 			c.flatPointBuffer.reset()
-
-		}
 
 	}
 	if !isConcaveHullPoolElementsSet {
@@ -109,6 +115,7 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 	if o != nil && o.ConcaveHullPool != nil {
 		o.ConcaveHullPool.Put(
 			&concaveHullPoolElement{
+				rtreePool: rtreePool,
 				searchItemsMem: c.searchItemsMem,
 				closestPointsMem: c.closestPointsMem,
 				fpbMem: c.flatPointBuffer,
