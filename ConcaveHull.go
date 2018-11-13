@@ -97,8 +97,7 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 			c.flatPointBuffer = poolEl.fpbMem
 			c.flatPointBuffer.reset()
 
-	}
-	if !isConcaveHullPoolElementsSet {
+	} else {
 		c.closestPointsMem = make([]closestPoint, 0 , 2)
 		c.searchItemsMem = make([]searchItem, 0 , 2)
 		estimatedProportionConcave2Convex := 4
@@ -106,8 +105,6 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 			estimatedProportionConcave2Convex = c.options.EstimatedRatioConcaveConvex
 		}
 		c.flatPointBuffer = makeFlatPointBuffer(2 * points.Len() * estimatedProportionConcave2Convex)
-
-
 	}
 
 	result := c.computeFromSorted(points)
@@ -210,7 +207,7 @@ func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []closestPoint) 
 			stack = append(stack, searchItem{left: index, right: item.right, lastLeftIndex: item.lastLeftIndex, lastRightIndex: item.lastRightIndex})
 		}
 	}
-	sort.Sort(closestPointSorter(closestPoints))
+	closestPointSorter(closestPoints).cpSort()
 	c.searchItemsMem = stack
 	c.closestPointsMem = closestPoints
 	return closestPoints[1:]

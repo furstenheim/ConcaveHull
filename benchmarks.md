@@ -13,42 +13,41 @@ Benchmark_segmentize/10000-4      	   50000	     97361 ns/op	      32 B/op	     
 Benchmark_segmentize/100000-4     	   20000	    239423 ns/op	      33 B/op	       0 allocs/op
 Benchmark_segmentize/200000-4     	   20000	    281185 ns/op	      33 B/op	       0 allocs/op
 Benchmark_segmentize/1000000-4    	   10000	    410572 ns/op	      36 B/op	       1 allocs/op
-Benchmark_segmentize/10-4         	 2000000	      1988 ns/op
-Benchmark_segmentize/1000-4       	  100000	     39105 ns/op
-Benchmark_segmentize/10000-4      	   50000	     93921 ns/op
-Benchmark_segmentize/100000-4     	   20000	    232279 ns/op
-Benchmark_segmentize/200000-4     	   20000	    285576 ns/op
-Benchmark_segmentize/1000000-4    	   10000	    403147 ns/op
+Benchmark_segmentize/10-4         	 2000000	      1555 ns/op
+Benchmark_segmentize/1000-4       	  200000	     35049 ns/op
+Benchmark_segmentize/10000-4      	   50000	     92363 ns/op
+Benchmark_segmentize/100000-4     	   20000	    230206 ns/op
+Benchmark_segmentize/200000-4     	   20000	    266386 ns/op
+Benchmark_segmentize/1000000-4    	   10000	    379276 ns/op
 
 
-
-
-Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/1000000.txt-4         	       5	 908069269 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/200000.txt-4          	      20	 196945584 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/300000.txt-4          	      20	 291410088 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/400000.txt-4          	      10	 367074779 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/500000.txt-4          	      10	 456065351 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/600000.txt-4          	      10	 566632675 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/700000.txt-4          	       5	 681264457 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/800000.txt-4          	       5	 737790308 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/900000.txt-4          	       5	 798832950 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/100000.txt-4         	      30	 146330142 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/1000000.txt-4        	       3	1041661865 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/200000.txt-4         	      20	 264029947 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/300000.txt-4         	      10	 339946220 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/400000.txt-4         	      10	 426496281 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/500000.txt-4         	      10	 537457566 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/600000.txt-4         	       5	 653815018 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/700000.txt-4         	       5	 779756498 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/800000.txt-4         	       5	 823789128 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/900000.txt-4         	       5	 996460443 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/100000.txt-4        	      20	 209456294 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/1000000.txt-4       	       3	1550163144 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/200000.txt-4        	      10	 320030486 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/300000.txt-4        	      10	 434919297 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/400000.txt-4        	      10	 518783894 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/500000.txt-4        	       5	 633226474 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/600000.txt-4        	       5	 920956669 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/700000.txt-4        	       3	1109857611 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/800000.txt-4        	       3	1130228565 ns/op
-Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/900000.txt-4        	       3	1278518679 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/100000.txt-4              	     100	  69045120 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/1000000.txt-4             	       5	 685723456 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/200000.txt-4              	      30	 122325797 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/300000.txt-4              	      20	 190877189 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/400000.txt-4              	      20	 247168609 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/500000.txt-4              	      10	 323649011 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/600000.txt-4              	      10	 418604069 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/700000.txt-4              	      10	 478512228 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/800000.txt-4              	      10	 539106545 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/900000.txt-4              	       5	 601282016 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/100000.txt-4             	     100	  65259282 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/1000000.txt-4            	       5	 727204442 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/200000.txt-4             	      30	 142090025 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/300000.txt-4             	      20	 197932924 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/400000.txt-4             	      20	 252384066 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/500000.txt-4             	      10	 326696865 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/600000.txt-4             	      10	 402677486 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/700000.txt-4             	      10	 481371836 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/800000.txt-4             	      10	 544173319 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/2-overburg/900000.txt-4             	       5	 646286804 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/100000.txt-4            	      50	  88047394 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/1000000.txt-4           	       5	 857021550 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/200000.txt-4            	      20	 158998797 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/300000.txt-4            	      20	 231790198 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/400000.txt-4            	      20	 280641323 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/500000.txt-4            	      10	 355571066 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/600000.txt-4            	      10	 515801300 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/700000.txt-4            	      10	 589203626 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/800000.txt-4            	       5	 623484721 ns/op
+Benchmark_ConcaveHullBig/examples/large-examples/3-geometric/900000.txt-4            	       5	 749219521 ns/op
