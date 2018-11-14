@@ -186,12 +186,19 @@ func (c * concaver) segmentize (x1, y1, x2, y2 float64) (points []closestPoint) 
 		fIndex := float64(index)
 		currentX := x1 + vX * fIndex
 		currentY := y1 + vY * fIndex
+		lx := closestPoints[item.lastLeftIndex].x
+		ly := closestPoints[item.lastLeftIndex].y
+		rx := closestPoints[item.lastRightIndex].x
+		ry := closestPoints[item.lastRightIndex].y
 
-		d1 := vX * fIndex * vX * fIndex + vY * fIndex * vY * fIndex + 0.0001
-		d2 := vX * (nSegments - fIndex) * vX * (nSegments - fIndex) + vY * (nSegments - fIndex) * vY * (nSegments - fIndex) + 0.0001
-		x, y, _, _ := c.rtree.FindNearestPointWithin(currentX, currentY, math.Min(d1, d2))
-		isNewLeft := x != closestPoints[item.lastLeftIndex].x || y != closestPoints[item.lastLeftIndex].y
-		isNewRight := x != closestPoints[item.lastRightIndex].x || y != closestPoints[item.lastRightIndex].y
+		d1 := (currentX - lx) * (currentX - lx) + (currentY - ly) * (currentY - ly)
+		d2 := (currentX - rx) * (currentX - rx) + (currentY - ry) * (currentY - ry)
+		x, y, _, found := c.rtree.FindNearestPointWithin(currentX, currentY, math.Min(d1, d2))
+		if !found {
+			continue
+		}
+		isNewLeft := x != lx || y != ly
+		isNewRight := x != rx || y != ry
 
 		// we don't know the point
 		if isNewLeft && isNewRight {

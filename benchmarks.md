@@ -2,10 +2,10 @@ BenchmarkCompute_ConcaveHullSmall/Memory/examples/examples/1-kwanyamazane.txt-4 
 BenchmarkCompute_ConcaveHullSmall/Memory#01/examples/examples/2-DT71_045.txt-4          	     300	  10572234 ns/op	 1530780 B/op	      49 allocs/op
 BenchmarkCompute_ConcaveHullSmall/Memory#02/examples/examples/3-table-mountain.txt-4    	     100	  38990675 ns/op	 5997608 B/op	      48 allocs/op
 BenchmarkCompute_ConcaveHullSmall/Memory#03/examples/examples/4-camps-drift.txt-4       	      20	 202520066 ns/op	29651639 B/op	      79 allocs/op
-BenchmarkCompute_ConcaveHullSmall/CPU/examples/examples/1-kwanyamazane.txt-4         	   10000	    686345 ns/op
-BenchmarkCompute_ConcaveHullSmall/CPU#01/examples/examples/2-DT71_045.txt-4          	     500	  11396668 ns/op
-BenchmarkCompute_ConcaveHullSmall/CPU#02/examples/examples/3-table-mountain.txt-4    	     100	  36612747 ns/op
-BenchmarkCompute_ConcaveHullSmall/CPU#03/examples/examples/4-camps-drift.txt-4       	      20	 196654568 ns/op
+BenchmarkCompute_ConcaveHullSmall/CPU/examples/examples/1-kwanyamazane.txt-4         	   10000	    521412 ns/op
+BenchmarkCompute_ConcaveHullSmall/CPU#01/examples/examples/2-DT71_045.txt-4          	     500	   9283438 ns/op
+BenchmarkCompute_ConcaveHullSmall/CPU#02/examples/examples/3-table-mountain.txt-4    	     100	  31340590 ns/op
+BenchmarkCompute_ConcaveHullSmall/CPU#03/examples/examples/4-camps-drift.txt-4       	      20	 206990361 ns/op
 ## low alloc are due to pooling
 Benchmark_segmentize/10-4         	 2000000	      1967 ns/op	      31 B/op	       0 allocs/op
 Benchmark_segmentize/1000-4       	  200000	     35615 ns/op	      31 B/op	       0 allocs/op
@@ -13,12 +13,13 @@ Benchmark_segmentize/10000-4      	   50000	     97361 ns/op	      32 B/op	     
 Benchmark_segmentize/100000-4     	   20000	    239423 ns/op	      33 B/op	       0 allocs/op
 Benchmark_segmentize/200000-4     	   20000	    281185 ns/op	      33 B/op	       0 allocs/op
 Benchmark_segmentize/1000000-4    	   10000	    410572 ns/op	      36 B/op	       1 allocs/op
-Benchmark_segmentize/10-4         	 2000000	      1555 ns/op
-Benchmark_segmentize/1000-4       	  200000	     35049 ns/op
-Benchmark_segmentize/10000-4      	   50000	     92363 ns/op
-Benchmark_segmentize/100000-4     	   20000	    230206 ns/op
-Benchmark_segmentize/200000-4     	   20000	    266386 ns/op
-Benchmark_segmentize/1000000-4    	   10000	    379276 ns/op
+Benchmark_segmentize/10-4         	10000000	       370 ns/op
+Benchmark_segmentize/1000-4       	  200000	     21137 ns/op
+Benchmark_segmentize/10000-4      	  100000	     77635 ns/op
+Benchmark_segmentize/100000-4     	   20000	    185105 ns/op
+Benchmark_segmentize/200000-4     	   20000	    215683 ns/op
+Benchmark_segmentize/1000000-4    	   10000	    328514 ns/op
+
 
 
 Benchmark_ConcaveHullBig/examples/large-examples/1-zeerust/100000.txt-4              	     100	  69045120 ns/op
