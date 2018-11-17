@@ -36,6 +36,7 @@ type concaveHullPoolElement struct {
 	closestPointsMem []closestPoint
 	searchItemsMem []searchItem
 	rtreePool *sync.Pool // This will be passed down to rtree
+	pointsCopy FlatPoints
 }
 func Compute (points FlatPoints) (concaveHull FlatPoints) {
 	return ComputeWithOptions(points, nil)
@@ -51,8 +52,7 @@ func ComputeFromSorted (points FlatPoints) (concaveHull FlatPoints) {
 // Compute concave hull from sorted points. Points are expected to be sorted lexicographically by (x,y)
 func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull FlatPoints) {
 	// Create a copy so that convex hull and index can modify the array in different ways
-	pointsCopy := make(FlatPoints, 0, len(points))
-	pointsCopy = append(pointsCopy, points...)
+	var pointsCopy FlatPoints
 	var rtreeOptions SimpleRTree.Options
 	var isConcaveHullPoolElementsSet bool
 	var poolEl *concaveHullPoolElement
@@ -68,6 +68,12 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 		}
 
 	}
+	if isConcaveHullPoolElementsSet && cap(poolEl.pointsCopy) >= len(points) {
+		pointsCopy = poolEl.pointsCopy[0:0]
+	} else {
+		pointsCopy = make(FlatPoints, 0, len(points))
+	}
+	pointsCopy = append(pointsCopy, points...)
 	rtreeOptions.RTreePool = rtreePool
 	rtreeOptions.UnsafeConcurrencyMode = true // we only access from one goroutine at a time
 	rtree := SimpleRTree.NewWithOptions(rtreeOptions)
@@ -91,7 +97,6 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 	}
 	c.rtree = rtree
 	if isConcaveHullPoolElementsSet {
-			isConcaveHullPoolElementsSet = true
 			c.closestPointsMem = poolEl.closestPointsMem
 			c.searchItemsMem = poolEl.searchItemsMem
 			c.flatPointBuffer = poolEl.fpbMem
@@ -116,6 +121,7 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 				searchItemsMem: c.searchItemsMem,
 				closestPointsMem: c.closestPointsMem,
 				fpbMem: c.flatPointBuffer,
+				pointsCopy: pointsCopy,
 			},
 		)
 	}

@@ -1,7 +1,8 @@
-BenchmarkCompute_ConcaveHullSmall/Memory/examples/examples/1-kwanyamazane.txt-4         	    5000	    785625 ns/op	   62969 B/op	      32 allocs/op
-BenchmarkCompute_ConcaveHullSmall/Memory#01/examples/examples/2-DT71_045.txt-4          	     500	   9966690 ns/op	 1540682 B/op	      38 allocs/op
-BenchmarkCompute_ConcaveHullSmall/Memory#02/examples/examples/3-table-mountain.txt-4    	     100	  37395416 ns/op	 6099712 B/op	      40 allocs/op
-BenchmarkCompute_ConcaveHullSmall/Memory#03/examples/examples/4-camps-drift.txt-4       	      20	 197821721 ns/op	27026094 B/op	      45 allocs/op
+BenchmarkCompute_ConcaveHullSmall/Memory/examples/examples/1-kwanyamazane.txt-4         	   10000	    747181 ns/op	   49282 B/op	      31 allocs/op
+BenchmarkCompute_ConcaveHullSmall/Memory#01/examples/examples/2-DT71_045.txt-4          	     300	  10822981 ns/op	 1307459 B/op	      36 allocs/op
+BenchmarkCompute_ConcaveHullSmall/Memory#02/examples/examples/3-table-mountain.txt-4    	     100	  38240726 ns/op	 5099172 B/op	      36 allocs/op
+BenchmarkCompute_ConcaveHullSmall/Memory#03/examples/examples/4-camps-drift.txt-4       	      20	 187965703 ns/op	21018896 B/op	      41 allocs/op
+
 BenchmarkCompute_ConcaveHullSmall/CPU/examples/examples/1-kwanyamazane.txt-4         	   10000	    521412 ns/op
 BenchmarkCompute_ConcaveHullSmall/CPU#01/examples/examples/2-DT71_045.txt-4          	     500	   9283438 ns/op
 BenchmarkCompute_ConcaveHullSmall/CPU#02/examples/examples/3-table-mountain.txt-4    	     100	  31340590 ns/op
