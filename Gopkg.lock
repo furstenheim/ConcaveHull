@@ -11,7 +11,7 @@
   branch = "master"
   name = "github.com/furstenheim/SimpleRTree"
   packages = ["."]
-  revision = "2617cbdbb03c5b35595cd3ea06d8f24dda7b5445"
+  revision = "eaf245b2d0d75ea67e14a643fa1bc6d53708c6db"
 
 [[projects]]
   branch = "master"
