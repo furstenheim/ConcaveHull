@@ -183,6 +183,11 @@ func Benchmark_ConcaveHullBig (b * testing.B) {
 func scanBenchmark (b * testing.B, path string, f os.FileInfo, isMemoryTest bool) {
 	points := readExampleFile(path, f)
 	concaveHullPool := &sync.Pool{}
+	_ = ComputeWithOptions(points, &Options{
+		Seglength: 1, // coordinates are in a projection
+		ConcaveHullPool: concaveHullPool,
+		EstimatedRatioConcaveConvex: 4,
+	})
 	b.Run(path, func (b * testing.B) {
 		if isMemoryTest {
 			b.ReportAllocs()

@@ -22,7 +22,7 @@ type concaver struct {
 	options *Options
 	closestPointsMem []closestPoint
 	searchItemsMem []searchItem
-	flatPointBuffer flatPointsBuffer
+	flatPointBuffer []float64
 	rtreePool *sync.Pool
 }
 type Options struct {
@@ -32,7 +32,7 @@ type Options struct {
 }
 
 type concaveHullPoolElement struct {
-	fpbMem flatPointsBuffer
+	fpbMem []float64
 	closestPointsMem []closestPoint
 	searchItemsMem []searchItem
 	rtreePool *sync.Pool // This will be passed down to rtree
@@ -97,10 +97,9 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 	}
 	c.rtree = rtree
 	if isConcaveHullPoolElementsSet {
-			c.closestPointsMem = poolEl.closestPointsMem
-			c.searchItemsMem = poolEl.searchItemsMem
-			c.flatPointBuffer = poolEl.fpbMem
-			c.flatPointBuffer.reset()
+		c.closestPointsMem = poolEl.closestPointsMem
+		c.searchItemsMem = poolEl.searchItemsMem
+		c.flatPointBuffer = poolEl.fpbMem[0:0]
 
 	} else {
 		c.closestPointsMem = make([]closestPoint, 0 , 2)
@@ -109,7 +108,7 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 		if c.options != nil && c.options.EstimatedRatioConcaveConvex != 0 {
 			estimatedProportionConcave2Convex = c.options.EstimatedRatioConcaveConvex
 		}
-		c.flatPointBuffer = makeFlatPointBuffer(2 * points.Len() * estimatedProportionConcave2Convex)
+		c.flatPointBuffer = make([]float64, 0, (2 * points.Len() * estimatedProportionConcave2Convex))
 	}
 
 	result := c.computeFromSorted(points)
@@ -136,8 +135,7 @@ func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatP
 
 	x0, y0 := convexHull.Take(0)
 	concaveHullBuffer := c.flatPointBuffer
-	concaveHullBuffer.addFloat(x0)
-	concaveHullBuffer.addFloat(y0)
+	concaveHullBuffer = append(concaveHullBuffer, x0, y0)
 	for i := 0; i<convexHull.Len(); i++ {
 		x1, y1 := convexHull.Take(i)
 		var x2, y2 float64
@@ -148,11 +146,11 @@ func (c * concaver) computeFromSorted (convexHull FlatPoints) (concaveHull FlatP
 		}
 		sideSplit := c.segmentize(x1, y1, x2, y2)
 		for _, p := range(sideSplit) {
-			concaveHullBuffer.addFloat(p.x)
-			concaveHullBuffer.addFloat(p.y)
+			concaveHullBuffer = append(concaveHullBuffer, p.x, p.y)
 		}
 	}
-	concaveHull = concaveHullBuffer.toFloatArray()
+	concaveHull = make([]float64, 0, len(concaveHullBuffer))
+	concaveHull = append(concaveHull, concaveHullBuffer...)
 	path := reducers.DouglasPeucker(geo.NewPathFromFlatXYData(concaveHull), c.seglength)
 	// reused allocated array
 	concaveHull = concaveHull[0:0]
