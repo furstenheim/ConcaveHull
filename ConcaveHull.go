@@ -36,6 +36,7 @@ type concaveHullPoolElement struct {
 	closestPointsMem []closestPoint
 	searchItemsMem []searchItem
 	rtreePool *sync.Pool // This will be passed down to rtree
+	convexHullPool *sync.Pool // This will be passed down to convex hull
 	pointsCopy FlatPoints
 }
 func Compute (points FlatPoints) (concaveHull FlatPoints) {
@@ -57,6 +58,7 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 	var isConcaveHullPoolElementsSet bool
 	var poolEl *concaveHullPoolElement
 	var rtreePool *sync.Pool
+	var convexHullPool *sync.Pool
 	if o != nil && o.ConcaveHullPool != nil {
 		concaveHullPoolElementsCandidate := o.ConcaveHullPool.Get()
 		if concaveHullPoolElementsCandidate != nil {
@@ -65,6 +67,7 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 			rtreePool = poolEl.rtreePool
 		} else {
 			rtreePool = &sync.Pool{} // If we are given a pool we want to initiate caching
+			convexHullPool = &sync.Pool{} // If we are given a pool we want to initiate caching
 		}
 
 	}
@@ -81,7 +84,7 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 	wg.Add(2)
 	// Convex hull
 	go func () {
-		points = go_convex_hull_2d.NewFromSortedArray(points).(FlatPoints)
+		points = go_convex_hull_2d.NewFromSortedArrayWithOptions(points, go_convex_hull_2d.Options{Pool: convexHullPool}).(FlatPoints)
 		wg.Done()
 	}()
 
@@ -117,6 +120,7 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 		o.ConcaveHullPool.Put(
 			&concaveHullPoolElement{
 				rtreePool: rtreePool,
+				convexHullPool: convexHullPool,
 				searchItemsMem: c.searchItemsMem,
 				closestPointsMem: c.closestPointsMem,
 				fpbMem: c.flatPointBuffer,

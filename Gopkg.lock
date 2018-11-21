@@ -17,7 +17,7 @@
   branch = "master"
   name = "github.com/furstenheim/go-convex-hull-2d"
   packages = ["."]
-  revision = "7afa6a3e6918d3ba86e0b1369810bf9bed310f77"
+  revision = "08788ab097268531bb2b4b8ceb899450db3fc91e"
 
 [[projects]]
   branch = "master"
