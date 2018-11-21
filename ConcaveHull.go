@@ -65,6 +65,7 @@ func ComputeFromSortedWithOptions (points FlatPoints, o *Options) (concaveHull F
 			isConcaveHullPoolElementsSet = true
 			poolEl = concaveHullPoolElementsCandidate.(*concaveHullPoolElement)
 			rtreePool = poolEl.rtreePool
+			convexHullPool = poolEl.convexHullPool
 		} else {
 			rtreePool = &sync.Pool{} // If we are given a pool we want to initiate caching
 			convexHullPool = &sync.Pool{} // If we are given a pool we want to initiate caching
